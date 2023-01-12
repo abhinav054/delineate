@@ -14,8 +14,8 @@ const LineChart = (
         xdataType,
         yDataType,
         yFormat,
-        yLabel
-    
+        yLabel,
+        id
     }
 )=>{
 
@@ -32,43 +32,61 @@ const LineChart = (
 
     }
 
-    const lineGraph = useCallback((node)=>{
 
-        const poinetermoved = (event)=>{
+    const poinetermoved = (event)=>{
             
 
-            let tooltiptype = getToolType();
+        let tooltiptype = getToolType();
 
-            if(tooltiptype=="adaptive"){
-                const [xm, ym] = d3.pointer(event);
-                console.log(xm, ym);
-            }
+        if(tooltiptype=="adaptive"){
+            const [xm, ym] = d3.pointer(event);
+            console.log(xm, ym);
+        }
+        
+        if(tooltiptype=="fixed"){
             
-            if(tooltiptype=="fixed"){
-                
-
-
-            }
-            
-
-            // const i = d3.least(I, i => Math.hypot(xScale(X[i])) - xm, yScale(Y[i]) - ym);
 
 
         }
+        
+
+        // const i = d3.least(I, i => Math.hypot(xScale(X[i])) - xm, yScale(Y[i]) - ym);
+
+
+    }
+
+    const lineGraph = useCallback((node)=>{
 
 
         if(node!=null&&x.length!=0&&y.length!=0){
             const parentNode = d3.select(node);
-            const svg = parentNode.select('svg').node()
-                            ? parentNode.select('svg')
-                            : parentNode.append('svg')
-                                .attr('width', width)
-                                .attr('height', height)
-                                .attr("viewBox", [0, 0, width, height])
-                                .attr("style", "max-width: 100%; height: auto; height: intrinsic;")
-                                .on("pointerenter", ()=>{})
-                                .on("pointermove",poinetermoved);
+            const svgNode = parentNode.select('svg').node();
+            let svg;
+            if(svgNode){
+
+                svg = parentNode.select('svg');
+                
+                svg.selectAll("*").remove();
+                
+                console.log(svg.node());
+                
+                svg
+                    .attr("width",width)
+                    .attr("height", height)
+                    .attr("viewBox", [0,0,width, height]);
+                
+                    console.log(svg.node())
+            }else{
+                svg  =  parentNode.append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr("viewBox", [0, 0, width, height])
+                .attr("style", "max-width: 100%; height: auto; height: intrinsic;")
+                .on("pointerenter", ()=>{})
+                .on("pointermove",poinetermoved);
+            }
         
+            console.log(svg.node());
             const X = [...x];
             const Y = [...y];
             const I = d3.range(X.length);
@@ -202,28 +220,11 @@ const LineChart = (
                     .attr("r",4)
                     .on("mouseover",mouseovertooltip)
                     .on("mouseout", mouseouttooltip)
-            
-        
-           
-
-            // function pointermoved(event) {
-            //         const [xm, ym] = d3.pointer(event);
-            //         const i = d3.least(I, i => Math.hypot(xScale(X[i]) - xm, yScale(Y[i]) - ym)); // closest point
-            //         path.style("stroke", ([z]) => Z[i] === z ? null : "#ddd").filter(([z]) => Z[i] === z).raise();
-            //         dot.attr("transform", `translate(${xScale(X[i])},${yScale(Y[i])})`);
-            //         if (T) dot.select("text").text(T[i]);
-            //         svg.property("value", O[i]).dispatch("input", {bubbles: true});
-            //       }
-                
-            // function pointerentered() {
-            //         path.style("mix-blend-mode", null).style("stroke", "#ddd");
-            //         dot.attr("display", null);
-            //       }
                 
         }
 
 
-    },[x,y])
+    },[x,y, width, height])
 
     return (
         <div ref={lineGraph}>

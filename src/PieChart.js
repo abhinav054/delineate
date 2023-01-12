@@ -119,7 +119,7 @@ const PieChart = (
 
         }
 
-    },[x,y])
+    },[x,y, width, height])
     
     // console.log(pieChart.current);
 

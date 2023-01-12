@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './App.css';
 import {parentBoundary} from "./style";
-import Texblock from './Texblock';
+import Textblock from './Textblock';
 import LineitemTest from './LineitemTest';
 import LineChart from './LineChart';
 import PieChart from './PieChart';
@@ -51,9 +51,18 @@ function App() {
     y: 0,
   });
 
+  const [boundaryState ,setboundaryState] = useState({
+    width: "100%",
+    height: 1000,
+    border: "1px solid black",
+    display: "flex",
+    resize: "vertical",
+    overflow: "auto"
+  });
+
   const parentBoundary = {
     width: "100%",
-    minHeight: "1000px",
+    height: "100%",
     border: "1px solid black",
     display: "flex"
   };
@@ -134,6 +143,16 @@ function App() {
             "x": 0,
             "y": 0
           }
+        },
+        {
+          "name": "LineChart",
+          "type": "linechart",
+          "positions":{
+            "width": 500,
+            "height": 500,
+            "x":0,
+            "y": 0
+          }
         }
       ]
 
@@ -158,7 +177,7 @@ function App() {
     let maxLineHeight = 0;
     let currentHeightIndex = 0;
     let number_of_lines = 0;
-
+    let totalHieght = 0;
     for(let i=0; i < widgetsCopy.length; i++){
       
       let positions = {...widgetsCopy[i].positions};
@@ -172,10 +191,11 @@ function App() {
         }
 
         x = (totalwidthavailable - widthAvailable);
-      widthAvailable = widthAvailable - positions.width;
+        widthAvailable = widthAvailable - positions.width;
 
       }else{
         number_of_lines = number_of_lines+1;
+        totalHieght = totalHieght +maxLineHeight;
         y = maxLineHeight;
         currentHeightIndex = maxLineHeight;
         x = 0;
@@ -190,8 +210,11 @@ function App() {
             y:y
       }
     }
-
-    console.log(widgetsCopy);
+    // square off the last max height
+    totalHieght = totalHieght + maxLineHeight;
+    let boundaryStateCopy = {...boundaryState};
+    boundaryStateCopy.height = totalHieght;
+    setboundaryState(boundaryStateCopy);
     setWidgets(widgetsCopy);
 
   } 
@@ -240,13 +263,44 @@ function App() {
     let x = d.x;
     let y = d.y;
     let widgetsCopy = [...widgets];
+    let height = boundaryState.minHeight;
+    let boundaryStateCopy = {...boundaryState};
+    if(y+widgetsCopy[index].height>height){
+      
+      boundaryStateCopy.width = y+widgetsCopy[index].height;
+
+    
+    }
     widgetsCopy[index].positions = {
           ...widgetsCopy[index].positions,
           x: x,
           y: y
     }
 
+    console.log(widgetsCopy);
+
     setWidgets(widgetsCopy);
+
+  }
+
+
+  const onDrag = (e,d)=>{
+    
+    let x = d.x;
+    
+    let y = d.y+500;
+
+    let boundaryStateCopy = {...boundaryState};
+    console.log(boundaryState);
+    console.log(d);
+    if(y>=boundaryStateCopy.height){
+
+      console.log(boundaryStateCopy);
+      boundaryStateCopy.height = y+100;
+    } 
+
+
+    setboundaryState(boundaryStateCopy);
 
   }
 
@@ -268,226 +322,13 @@ function App() {
 
     let new_width = ref.offsetWidth;
 
-    // if(direction=="top"){
-
-    //   if(new_height<height){
-    //     widgetsCopy[index].positions = {...widgetsCopy[index].positions,
-    //                                 height: new_height
-    //                               }
-    //   }else{
-
-    //     let start_position_x = x;
-      
-    //     let end_position_x = x+width;
-
-    //     let new_y_position = y -(new_height-height);
-
-    //     // resize widget
-    //     for(let i =0; i < widgetsCopy.length; i++){
-
-    //       let widget_start_x = widgetsCopy[i].positions.x;
-        
-    //       let widget_end_x = widgetsCopy[i].positions.x + widgetsCopy[i].positions.width;
-
-    //       if(widget_end_x>start_position_x&&widget_start_x<end_position_x){
-      
-    //         let widget =  widgetsCopy[i];
-          
-    //         let widget_y_end = widget.positions.y + widget.positions.height;
-
-    //         if(new_y_position<widget_y_end){
-
-    //           // 
-    //           let size = widgetsCopy[i].positions.height -(new_y_position-widget_y_end);
-
-    //           if(size>=0){
-                
-    //             widgetsCopy[i].positions = {...widgetsCopy[i].positions,
-    //                                       height: size
-    //                                       }
-    //           }else{
-                
-    //             widgetsCopy[i].positions = {...widgetsCopy[i].positions,
-    //                                       height: 0
-    //                                     }
-                
-    //           }
-
-
-    //         }
-
-    //       }
-
-    //     }
-
-    //     widgetsCopy[index].positions = {...widgetsCopy[index].positions,
-    //                                     height: new_height
-    //                                     }
-        
-
-
-
-    //   }
-
-    // }
-
-    // if(direction=="rightTop"){
-      
-    //   let start_position_y = y;
-      
-    //   let end_position_y = y+height;
-
-    //   let start_postion_x = x;
-
-    //   let end_postion_x = x;
-
-
-    //   // resize width
-    //   if(new_width<width){
-
-
-
-
-    //     widgetsCopy[index].positions = {...widgetsCopy[index].positions,
-    //                                     width: new_width
-    //                                 }
-
-
-    //   }else{
-
-
-
-    //     let new_x_position = x +(new_width-width);
-
-
-    //     for(let i=0; i < widgetsCopy[i].length; i++){
-    //         let widget_start_y = widgetsCopy[i].positions.y;
-    //         let widget_end_y = widgetsCopy[i].positions.y+ widgetsCopy[i].positions.height;
-    //         if(widget_end_y > start_position_y&&widget_start_y < end_position_y){
-              
-    //           let widget =  widgetsCopy[i];
-          
-    //           let widget_x_end = widget.positions.x + widget.positions.height;
-
-
-
-    //           if(new_x_position<widget_x_end){
-
-    //             // 
-    //             let size = widgetsCopy[i].positions.width -(new_x_position - widget_x_end);
-  
-    //             if(size>=0){
-                  
-    //               widgetsCopy[i].positions = {...widgetsCopy[i].positions,
-    //                                         width: size
-    //                                         }
-    //             }else{
-                  
-    //               widgetsCopy[i].positions = {...widgetsCopy[i].positions,
-    //                                         width: 0
-    //                                       }
-                  
-    //             }
-  
-  
-    //           }
-
-
-    //         }
-
-    //     }
-
-    //     widgetsCopy[index].positions = {...widgetsCopy[index].positions, 
-    //                                     width: new_width
-    //                                   }
-      
-    //   }
-
-    //   // resize height
-
-    //   if(new_height<height){
-
-    //     widgetsCopy[index].positions = {...widgetsCopy[index].positions,
-    //                                     height: new_height
-    //                                   }
-    //   }else{
-
-    //     let start_position_x = x;
-      
-    //     let end_position_x = x+width;
-
-    //     let new_y_position = y -(new_height-height);
-
-    //     // resize widget
-    //     for(let i =0; i < widgetsCopy.length; i++){
-
-    //       let widget_start_x = widgetsCopy[i].positions.x;
-        
-    //       let widget_end_x = widgetsCopy[i].positions.x + widgetsCopy[i].positions.width;
-
-    //       if(widget_end_x>start_position_x&&widget_start_x<end_position_x){
-      
-    //         let widget =  widgetsCopy[i];
-          
-    //         let widget_y_end = widget.positions.y + widget.positions.height;
-
-    //         if(new_y_position<widget_y_end){
-
-    //           // 
-    //           let size = widgetsCopy[i].positions.height -(new_y_position-widget_y_end);
-
-    //           if(size>=0){
-                
-    //             widgetsCopy[i].positions = {...widgetsCopy[i].positions,
-    //                                       height: size
-    //                                       }
-    //           }else{
-                
-    //             widgetsCopy[i].positions = {...widgetsCopy[i].positions,
-    //                                       height: 0
-    //                                     }
-                
-    //           }
-
-
-    //         }
-
-    //       }
-
-    //     }
-
-    //     widgetsCopy[index].positions = {...widgetsCopy[index].positions,
-    //                                     height: new_height
-    //                                     }
-        
-
-    //   }
-
-    // }
-
-    // if(direction=="rightBottom"){
-      
-    //   let start_position_x = x;
-      
-    //   let end_position_x = y;
-
-    //   let new_x_position = x
-
-
-    // }
-    
     widgetsCopy[index].positions = {...widgetsCopy[index].positions,
                                 width: ref.offsetWidth,
                                 height: ref.offsetHeight,
                                 x: position.x,
                                 y: position.y
                               }
-    
-    
-
-
-    
-
+  
     setWidgets(widgetsCopy);
     // calculatePositions(widgetsCopy);                       
   
@@ -505,18 +346,54 @@ function App() {
   const x = data.map((d)=>{ return d.name});
   const y = data.map((d)=>{ return d.value});
 
+  const Counter = props => {
+    const renderCounter  = useRef(0);
+    renderCounter.current = renderCounter.current + 1;
+    return <h1>Renders: {renderCounter.current}, {props.message}</h1>;
+  };
+
   return (
-    <div className='main-container' style={parentBoundary}>
+    <div className='main-container' style={boundaryState}>
       {/* <Barchart x={x} y={y} width={500} height={500}></Barchart> */}
 
       {/* <PieChart x={x} y={y} width={500} height={500}></PieChart> */}
       {/* <LineChart x={x} y={y}></LineChart> */}
+      {/* <Rnd
+          style={style}
+          bounds="window"
+          size={{
+                  width: 500,
+                  height: 500,
+                }}
+                position={{
+                  x: cords.x,
+                  y: cords.y,
+                }}
+                onDrag= {(e,d)=>{
+                  onDrag(e,d);
+                }}
+                onDragStop={(e, d) => {
+                  
+                  let cordsCopy = {...cords};
+                  cordsCopy.x = d.x;
+                  cordsCopy.y = d.y;              
+                  setCords(cordsCopy);
+
+
+                }}
+                onResizeStop={(e, direction, ref, delta, position) => {
+                  onResize(e, direction, ref, delta, position)
+                }}
+            >
+                <Textblock></Textblock>
+            </Rnd>
+       */}
       {
         widgets.map((widget, index)=>{
         return(
             <Rnd
               style={style}
-              bounds="parent"
+              bounds="window"
               size={{
                   width: widget.positions.width,
                   height: widget.positions.height,
@@ -525,19 +402,38 @@ function App() {
                   x: widget.positions.x,
                   y: widget.positions.y,
                 }}
-                onMouseDown={(e)=>{
-                  console.log(e);
+                onDrag= {(e,d)=>{
+                  if(boundaryState.height<(d.y+widget.positions.height)){
+                    let boundaryStateCopy = {...boundaryState};
+                    boundaryStateCopy.height = boundaryStateCopy.height+200;
+                    setboundaryState(boundaryStateCopy);
+                  }
+
                 }}
                 onDragStop={(e, d) => {
                   onDragStopV2(e,d,index);
+                }}
+                onResize={(e, direction, ref, delta, position)=>{
+
+                  let y = widget.positions.x + ref.offsetHeight;
+
+                  let boundaryStateCopy = {...boundaryState}
+
+                  if(y>boundaryStateCopy.height){
+                    boundaryStateCopy.height = boundaryStateCopy.height+5;
+                    setboundaryState(boundaryStateCopy);
+                  }
+
+
                 }}
                 onResizeStop={(e, direction, ref, delta, position) => {
                   onResize(e, direction, ref, delta, position, index)
                 }}
             >
-              {(widget.type=="barchart")&&<Barchart x={x} y={y} width={widget.positions.width} height={widget.positions.height}></Barchart>}
+              {(widget.type=="barchart")&&<Barchart x={x} y={y} width={widget.positions.width} height={widget.positions.height} id={"barchart-"+index}></Barchart>}
               {(widget.type=="piechart")&&<PieChart x={x} y={y} width={widget.positions.width} height={widget.positions.height} id={"piechart-"+index}></PieChart>}
-              {(widget.type=="linechart")&&<LineChart x={x} y={y} width={widget.positions.width} height={widget.positions.height}></LineChart>}
+              {(widget.type=="linechart")&&<LineChart x={x} y={y} width={widget.positions.width} height={widget.positions.height} id={"linechart-"+index}></LineChart>}
+              {(widget.type=="textblock"&&<Textblock width={widget.positions.width} height={widget.positions.height} fontSize={20} id={"textblock-"+index}></Textblock>)}
             </Rnd>
         )
 

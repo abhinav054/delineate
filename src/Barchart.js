@@ -291,7 +291,6 @@ const Barchart = ({
     return (
         <div
             ref={bargraph}
-
         >
 
         </div>
